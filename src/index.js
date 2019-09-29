@@ -10,7 +10,10 @@ function expressionCalculator(expr) {
         '+': (a, b) => a + b,
         '-': (a, b) => a - b,
         '*': (a, b) => a * b,
-        '/': (a, b) => a / b
+        '/': (a, b) => {
+            if (b === 0) throw new Error("TypeError: Division by zero.");
+            return a / b;
+        }
     }
     const priority = {
         '+': 0,
@@ -83,8 +86,19 @@ function expressionCalculator(expr) {
         if (brackets.includes(operatorStack[operatorStack.length - 1])) throw new Error("ExpressionError: Brackets must be paired");
         postfixNotation.push(operatorStack.pop());
     }
-    console.log(exprArr, postfixNotation, operatorStack);
 
+    // Calculator
+    let operandStack = [];
+    postfixNotation.forEach(el => {
+        if (isNumber(el)) operandStack.push(el);
+        if (isOperator(el)) {
+            let b = operandStack.pop();
+            let a = operandStack.pop();
+            operandStack.push(operators[el](+a, +b));
+        }
+    })
+
+    return operandStack[0];
 }
 
 
