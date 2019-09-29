@@ -11,6 +11,7 @@ function expressionCalculator(expr) {
         '-': (a, b) => a - b,
         '*': (a, b) => a * b,
         '/': (a, b) => {
+            // zero division case handling
             if (b === 0) throw new Error("TypeError: Division by zero.");
             return a / b;
         }
@@ -21,6 +22,7 @@ function expressionCalculator(expr) {
         '*': 1,
         '/': 1
     }
+    // add a terminator in order to correctly parse a given string
     const terminator = '.';
     const postfixNotation = [];
     const operatorStack = [];
@@ -42,25 +44,19 @@ function expressionCalculator(expr) {
     }
 
     let i = 0;
-
     exprArr.push(terminator);
     while (exprArr.length) {
         // if number => to the stack
-        // console.log(exprArr, postfixNotation, operatorStack);
         if (isNumber(exprArr[i])) {
             // find first bracket or operator (get full number)
-            // console.log(!isNumber[1]);
-            // console.log(exprArr.findIndex((el, index) => !isNumber(el) && index > i));
             postfixNotation.push(exprArr.splice(i, Math.max(exprArr.findIndex((el, index) => !isNumber(el) && index > i) - i, 1)).join(''));
         }
-        // console.log(exprArr, postfixNotation, operatorStack);
         // if operator
         if (isOperator(exprArr[i])) {
             while ((isOperator(operatorStack[operatorStack.length - 1]) && priority[operatorStack[operatorStack.length - 1]] >= priority[exprArr[i]]) ||
                 isRightParenthesis(operatorStack[operatorStack.length - 1])) {
                 postfixNotation.push(operatorStack.pop());
             }
-
             operatorStack.push(exprArr.shift());
         }
 
@@ -69,6 +65,7 @@ function expressionCalculator(expr) {
         }
 
         if (isRightParenthesis(exprArr[i])) {
+            // find a left parenthesis to match given right parenthesis (if there is none of left parenthesis => error)
             if (!(operatorStack.includes(brackets[0]))) throw new Error("ExpressionError: Brackets must be paired");
             while (!(isLeftParenthesis(operatorStack[operatorStack.length - 1]))) {
                 postfixNotation.push(operatorStack.pop());
@@ -81,7 +78,7 @@ function expressionCalculator(expr) {
 
         if (exprArr[i] === terminator) exprArr.shift();
     }
-
+    // add to the postfix expression the rest of the operator stack
     while (operatorStack.length) {
         if (brackets.includes(operatorStack[operatorStack.length - 1])) throw new Error("ExpressionError: Brackets must be paired");
         postfixNotation.push(operatorStack.pop());
@@ -100,9 +97,6 @@ function expressionCalculator(expr) {
 
     return operandStack[0];
 }
-
-
-
 
 module.exports = {
     expressionCalculator
